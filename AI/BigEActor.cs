@@ -93,7 +93,7 @@ namespace Eidolon.AI
 
         // ─── Tick (called by AIManager on medium interval) ───────────────────
 
-        public new void Tick()
+        public override void Tick()
         {
             if (!IsPhaseActive || IsDormant) return;
 
