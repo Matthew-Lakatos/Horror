@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using Eidolon.Core;
 using Eidolon.World;
+using Eidolon.AI;
 
 namespace Eidolon.Actors
 {
