@@ -346,7 +346,7 @@ namespace Eidolon.Audio
             StartCoroutine(FadeSource(_tinnitusSource, _tinnitusSource.volume, _tinnitusMaxVolume * magnitude, 0.5f));
         }
 
-        private void ActivateMuffled(float duration)
+        public void ActivateMuffled(float duration)
         {
             _muffledActive = true;
             _muffledExpiry = Time.time + duration;
