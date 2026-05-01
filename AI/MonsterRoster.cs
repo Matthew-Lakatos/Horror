@@ -39,7 +39,7 @@ namespace Eidolon.AI
         private void OnEnable()  => EventBus.Subscribe<PlayerNoiseEvent>(OnNoise);
         private void OnDisable() => EventBus.Unsubscribe<PlayerNoiseEvent>(OnNoise);
 
-        public new void Tick()
+        public override void Tick()
         {
             if (!IsPhaseActive || IsDormant) return;
             _stateTimer += Time.deltaTime;
@@ -156,7 +156,7 @@ namespace Eidolon.AI
         private int   _activeTraps;
         private float _lastPlacedTime = -999f;
 
-        public new void Tick()
+        public override void Tick()
         {
             if (!IsPhaseActive || IsDormant) return;
             if (Time.time - _lastPlacedTime < _placementCooldown) return;
@@ -295,7 +295,7 @@ namespace Eidolon.AI
             _playerTransform = GameObject.FindWithTag("Player")?.transform;
         }
 
-        public new void Tick()
+        public override void Tick()
         {
             if (!IsPhaseActive || IsDormant) return;
             if (_liesThisPhase >= _maxLiesPerPhase) return;
@@ -378,7 +378,7 @@ namespace Eidolon.AI
             EventBus.Unsubscribe<PlayerHealedEvent>(OnPlayerHealed);
         }
 
-        public new void Tick()
+        public override void Tick()
         {
             if (!IsPhaseActive || IsDormant) return;
 
@@ -466,7 +466,7 @@ namespace Eidolon.AI
             _playerTransform = GameObject.FindWithTag("Player")?.transform;
         }
 
-        public new void Tick()
+        public override void Tick()
         {
             if (!IsPhaseActive || IsDormant) return;
 
@@ -539,7 +539,7 @@ namespace Eidolon.AI
             PresenceModule?.Hide();
         }
 
-        public new void Tick()
+        public override void Tick()
         {
             if (!IsPhaseActive || IsDormant) return;
             if (_appearanceCount >= _maxAppearancesPerSession) return;
