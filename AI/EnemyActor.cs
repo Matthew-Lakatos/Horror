@@ -78,7 +78,7 @@ namespace Eidolon.AI
 
         // ─── Tick Pipeline (called by AIManager on typed intervals) ─────────
 
-        public void Tick()
+        public virtual void Tick()
         {
             if (!IsPhaseActive || IsDormant) return;
 
