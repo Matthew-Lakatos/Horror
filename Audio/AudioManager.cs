@@ -330,7 +330,7 @@ namespace Eidolon.Audio
                 _muffledActive = false;
         }
 
-        private void ActivateTinnitus(float duration, float magnitude)
+        public void ActivateTinnitus(float duration, float magnitude)
         {
             if (_tinnitusSource == null || _tinnitusClip == null) return;
             _tinnitusActive = true;
