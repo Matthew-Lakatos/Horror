@@ -98,6 +98,7 @@ namespace Eidolon.Actors
         {
             EventBus.Subscribe<PlayerDamagedEvent>(OnDamaged);
             EventBus.Subscribe<PlayerHealedEvent>(OnHealed);
+            EventBus.Subscribe<BatteryReplacedEvent>(OnBatteryReplaced);
             EventBus.Subscribe<ConditionAppliedEvent>(OnConditionApplied);
             EventBus.Subscribe<RoomStateChangedEvent>(OnRoomStateChanged);
         }
@@ -106,6 +107,7 @@ namespace Eidolon.Actors
         {
             EventBus.Unsubscribe<PlayerDamagedEvent>(OnDamaged);
             EventBus.Unsubscribe<PlayerHealedEvent>(OnHealed);
+            EventBus.Unsubscribe<BatteryReplacedEvent>(OnBatteryReplaced);
             EventBus.Unsubscribe<ConditionAppliedEvent>(OnConditionApplied);
             EventBus.Unsubscribe<RoomStateChangedEvent>(OnRoomStateChanged);
         }
@@ -187,6 +189,11 @@ namespace Eidolon.Actors
 
             if (_flashlightOn && Battery > 0)
                 Battery = Mathf.Max(0f, Battery - _batteryDrain * Time.deltaTime);
+        }
+
+        private void OnBatteryReplaced(BatteryReplacedEvent evt)
+        {
+            Battery = Mathf.Min(_maxBattery, Battery + evt.RestoreAmount);
         }
 
         // ─── Stamina ────────────────────────────────────────────────────────
