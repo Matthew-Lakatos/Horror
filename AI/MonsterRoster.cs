@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using Eidolon.Core;
+using Eidolon.World;
 
 namespace Eidolon.AI
 {
