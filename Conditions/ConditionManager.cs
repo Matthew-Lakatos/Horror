@@ -132,12 +132,7 @@ namespace Eidolon.Conditions
 
                 case ConditionType.Tinnitus:
                     // Tinnitus handled in AudioManager via event — no visual payload
-                    EventBus.Publish(new ConditionAppliedEvent
-                    {
-                        ConditionType = ConditionType.Tinnitus,
-                        Duration      = 0f, // signal to AudioManager only
-                        Magnitude     = magnitude
-                    });
+                    Audio.AudioManager.Instance?.ActivateTinnitus(duration, magnitude);
                     break;
 
                 case ConditionType.PanicBreathing:
