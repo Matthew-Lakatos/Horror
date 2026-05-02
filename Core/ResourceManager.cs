@@ -321,4 +321,133 @@ namespace Eidolon.World
             if (_visual) _visual.SetActive(false);
         }
     }
+
+    public class KeyItemManager : MonoBehaviour
+    {
+        public static KeyItemManager Instance { get; private set; }
+ 
+        private readonly HashSet<KeyItemType> _heldKeys = new HashSet<KeyItemType>();
+ 
+        private void Awake()
+        {
+            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+            Instance = this;
+        }
+ 
+        // ─── Acquisition ────────────────────────────────────────────────────
+ 
+        public void AcquireKey(KeyItemType type, string itemId)
+        {
+            if (_heldKeys.Contains(type)) return;
+            _heldKeys.Add(type);
+ 
+            EventBus.Publish(new KeyItemAcquiredEvent { ItemType = type, ItemId = itemId });
+            Debug.Log($"[KeyItemManager] Acquired: {type}");
+        }
+ 
+        public bool HasKey(KeyItemType type) => _heldKeys.Contains(type);
+ 
+        // ─── Save / Load ─────────────────────────────────────────────────────
+ 
+        public List<KeyItemType> ExportState() => new List<KeyItemType>(_heldKeys);
+ 
+        public void ImportState(List<KeyItemType> data)
+        {
+            _heldKeys.Clear();
+            foreach (var k in data) _heldKeys.Add(k);
+        }
+    }
+ 
+    // ─────────────────────────────────────────────────────────────────────────
+    // KEY ITEM PICKUP — World object for any key item
+    // Works for: SecurityKeycard, UtilityKey, OverrideToken, ElevatorPass
+    // ─────────────────────────────────────────────────────────────────────────
+ 
+    public class KeyItemPickup : MonoBehaviour
+    {
+        [Header("Identity")]
+        [SerializeField] private string      _itemId;
+        [SerializeField] private KeyItemType _keyType;
+ 
+        [Header("Display")]
+        [SerializeField] private string      _displayName = "Key Item";
+        [SerializeField] private GameObject  _visual;
+ 
+        [Header("Optional Lore")]
+        [SerializeField] private Data.LoreLogData _attachedLog;
+ 
+        [Header("Audio")]
+        [SerializeField] private AudioClip   _pickupClip;
+ 
+        private bool _collected;
+        private AudioSource _audioSource;
+ 
+        private void Awake() => _audioSource = GetComponent<AudioSource>();
+ 
+        private void OnTriggerEnter(Collider other)
+        {
+            if (_collected || !other.CompareTag("Player")) return;
+            Collect();
+        }
+ 
+        // Also allow manual E-key interaction (for items on desks/tables)
+        private void Update()
+        {
+            if (_collected) return;
+            if (!Input.GetKeyDown(KeyCode.E)) return;
+ 
+            var cam = Camera.main;
+            if (cam == null) return;
+ 
+            if (Physics.Raycast(cam.transform.position, cam.transform.forward,
+                    out RaycastHit hit, 2.5f) && hit.collider.gameObject == gameObject)
+                Collect();
+        }
+ 
+        private void Collect()
+        {
+            _collected = true;
+            KeyItemManager.Instance?.AcquireKey(_keyType, _itemId);
+ 
+            // Attach lore log if present
+            if (_attachedLog != null)
+                Core.ResourceManager.Instance?.CollectLog(_attachedLog);
+ 
+            if (_audioSource && _pickupClip)
+                _audioSource.PlayOneShot(_pickupClip);
+ 
+            // Brief delay so audio plays before disabling visual
+            if (_visual) _visual.SetActive(false);
+        }
+ 
+        // ─── Inspector helpers ───────────────────────────────────────────────
+ 
+        public KeyItemType KeyType   => _keyType;
+        public string      ItemId    => _itemId;
+        public string      DisplayName => _displayName;
+    }
+ 
+    // ─────────────────────────────────────────────────────────────────────────
+    // ELEVATOR PASS PICKUP — Specialised KeyItemPickup
+    // Optional item discovered through exploration/side quest.
+    // Has additional contextual messaging when found.
+    // ─────────────────────────────────────────────────────────────────────────
+ 
+    public class ElevatorPassPickup : KeyItemPickup
+    {
+        [Header("Elevator Pass Specific")]
+        [SerializeField] private string _discoveryHint =
+            "EIDOLON INDUSTRIAL — ELEVATOR OPERATIONS PASS\nAuthorised Personnel Only";
+        [SerializeField] private UI.PhoneDevice _phone;
+ 
+        // On collect, push a message to the phone's Messages tab
+        private void OnEnable() => EventBus.Subscribe<KeyItemAcquiredEvent>(OnKeyAcquired);
+        private void OnDisable() => EventBus.Unsubscribe<KeyItemAcquiredEvent>(OnKeyAcquired);
+ 
+        private void OnKeyAcquired(KeyItemAcquiredEvent evt)
+        {
+            if (evt.ItemType != KeyItemType.ElevatorPass) return;
+            _phone?.AddSystemMessage("ELEVATOR ACCESS ENABLED — Use panel on Ground Floor.");
+        }
+    }
 }
