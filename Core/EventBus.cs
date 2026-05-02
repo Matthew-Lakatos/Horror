@@ -181,4 +181,32 @@ namespace Eidolon.Core
                                  MuffledHearing, SlowedInteraction, LouderFootsteps, PanicBreathing,
                                  ChromaticShift, InputLag }
     public enum DifficultyLevel { Easy, Normal, Hard, Impossible }
+
+    // ─── New Event: Key Item Acquired ────────────────────────────────────────
+    // Fired when the player picks up any key item (keycard, token, elevator pass).
+    // ElevatorController and FloorLockSystem listen to this.
+ 
+    public struct KeyItemAcquiredEvent
+    {
+        public KeyItemType ItemType;
+        public string      ItemId;     // matches KeyItem.ItemId for dedup
+    }
+ 
+    public struct ElevatorCalledEvent
+    {
+        public string ElevatorId;
+        public int    TargetFloor;
+        public bool   WasGranted;   // false = denied (no pass, floor locked)
+    }
+ 
+    // ─── New Enum: Key Item Types ────────────────────────────────────────────
+ 
+    public enum KeyItemType
+    {
+        SecurityKeycard,    // Unlocks upper mezzanine floor button
+        UtilityKey,         // Unlocks basement floor button
+        OverrideToken,      // Opens specific locked terminal/door
+        ElevatorPass,       // Required to use elevator at all (optional discovery)
+        PhoneCharger        // Optional — enables Phone device
+    }
 }
